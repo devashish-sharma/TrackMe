@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">TrackMe</string>
+    <string name="select">Select Customer from Here:</string>
+    <string name="title_activity_maps">Map</string>
+</resources>
+

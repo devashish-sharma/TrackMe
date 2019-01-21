@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/item1"
+        android:icon="@drawable/ic_insert_comment_white_24dp"
+        android:title="Disclaimer"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/item2"
+        android:icon="@drawable/ic_close_white_24dp"
+        android:title="Exit"
+        app:showAsAction="always" />
+
+</menu>
