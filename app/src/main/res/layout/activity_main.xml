@@ -73,6 +73,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        app:cardCornerRadius="10dp"
         app:cardUseCompatPadding="true">
 
         <LinearLayout
@@ -85,7 +86,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="10dp"
-                app:srcCompat="@drawable/ic_my_location_black_24dp" />
+                app:srcCompat="@drawable/ic_my_location_black_24dp"
+                tools:ignore="VectorDrawableCompat" />
 
             <ProgressBar
                 android:id="@+id/pb"
@@ -109,7 +111,7 @@
 
             <Button
                 android:id="@+id/showmap"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:background="@drawable/btn_effect"
