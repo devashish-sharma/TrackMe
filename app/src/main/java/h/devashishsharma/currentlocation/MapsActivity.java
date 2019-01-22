@@ -55,6 +55,7 @@ public class MapsActivity extends AppCompatActivity implements
     private GoogleApiClient googleApiClient;
     private Marker currentUserLocationMarker;
     private static final int Request_User_Location_Code = 99;
+    LatLng latLng;
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -78,7 +79,7 @@ public class MapsActivity extends AppCompatActivity implements
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         //LocationButton Alignment
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitleTextColor(Color.WHITE);
 
@@ -117,7 +118,7 @@ public class MapsActivity extends AppCompatActivity implements
             @Override
             public void onMarkerDragStart(Marker marker) {
                 Log.e("mapDrag", "DragStart : " + marker.getPosition());
-                marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
+                marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
                 Toast.makeText(MapsActivity.this, "Searching...", Toast.LENGTH_SHORT).show();
             }
 
@@ -127,7 +128,7 @@ public class MapsActivity extends AppCompatActivity implements
 
             public void onMarkerDragEnd(Marker marker) {
                 try {
-                    marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET));
+                    marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
                     Log.e("mapDrag", "DragStart : " + marker.getPosition());
                     LatLng position = marker.getPosition();
                     Address filterAddress;
@@ -165,9 +166,9 @@ public class MapsActivity extends AppCompatActivity implements
             @Override
             public boolean onMyLocationButtonClick() {
                 try {
-                    LatLng latLng1 = currentUserLocationMarker.getPosition();
-                    currentUserLocationMarker.setPosition(latLng1);
-                    currentUserLocationMarker.setSnippet(String.valueOf(latLng1.latitude + " ," + latLng1.longitude));
+                    currentUserLocationMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+                    currentUserLocationMarker.setPosition(latLng);
+                    currentUserLocationMarker.setSnippet(String.valueOf(latLng.latitude + " ," + latLng.longitude));
                     currentUserLocationMarker.showInfoWindow();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -205,7 +206,6 @@ public class MapsActivity extends AppCompatActivity implements
                 } else {
                     Toast.makeText(this, "Permission Denied...", Toast.LENGTH_SHORT).show();
                 }
-                return;
         }
     }
 
@@ -221,7 +221,7 @@ public class MapsActivity extends AppCompatActivity implements
     @Override
     public void onLocationChanged(final Location location) {
         Location lastlocation = location;
-        LatLng latLng = new LatLng(lastlocation.getLatitude(), lastlocation.getLongitude());
+        latLng = new LatLng(lastlocation.getLatitude(), lastlocation.getLongitude());
         if (currentUserLocationMarker != null) {
             currentUserLocationMarker.remove();
         }
