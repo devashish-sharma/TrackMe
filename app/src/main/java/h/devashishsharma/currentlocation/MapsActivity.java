@@ -79,15 +79,21 @@ public class MapsActivity extends AppCompatActivity implements
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         //LocationButton Alignment
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitleTextColor(Color.WHITE);
-
-        View locationButton = ((View) mapFragment.getView().findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
+        //current location button
+        final View locationButton = ((View) mapFragment.getView().findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
         RelativeLayout.LayoutParams rlp = (RelativeLayout.LayoutParams) locationButton.getLayoutParams();
         rlp.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
         rlp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
         rlp.setMargins(0, 0, 30, 350);
+        locationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                locationButton.setBackgroundColor(Color.BLUE);
+            }
+        });
     }
 
     @Override
@@ -140,7 +146,8 @@ public class MapsActivity extends AppCompatActivity implements
                     filterAddress = addresses.get(0);
                     marker.setSnippet(String.valueOf(position.latitude + " , " + position.longitude));
                     marker.showInfoWindow();
-                    Toast.makeText(MapsActivity.this, "" + filterAddress.getAddressLine(0), Toast.LENGTH_SHORT).show();
+                    View parentLayout = findViewById(android.R.id.content);
+                    Snackbar.make(parentLayout, " " + filterAddress.getAddressLine(0), Snackbar.LENGTH_SHORT).show();
                     Log.d("myDrag", String.valueOf(position) + filterAddress.getAddressLine(0));
                 } catch (IOException ex) {
                     ex.printStackTrace();
@@ -166,10 +173,19 @@ public class MapsActivity extends AppCompatActivity implements
             @Override
             public boolean onMyLocationButtonClick() {
                 try {
+                    Address filterAddress;
+                    Geocoder geoCoder = new Geocoder(
+                            getBaseContext(), Locale.getDefault());
+                    List<Address> addresses = geoCoder.getFromLocation(
+                            latLng.latitude,
+                            latLng.longitude, 1);
+                    filterAddress = addresses.get(0);
                     currentUserLocationMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
                     currentUserLocationMarker.setPosition(latLng);
                     currentUserLocationMarker.setSnippet(String.valueOf(latLng.latitude + " ," + latLng.longitude));
                     currentUserLocationMarker.showInfoWindow();
+                    View parentLayout = findViewById(android.R.id.content);
+                    Snackbar.make(parentLayout, "" + filterAddress.getAddressLine(0), Snackbar.LENGTH_SHORT).show();
                 } catch (Exception e) {
                     e.printStackTrace();
                     Log.d("here", " " + e.getMessage());
