@@ -1,18 +1,33 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/ft</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:windowFullscreen">true</item>
         <item name="android:screenOrientation">portrait</item>
+        <item name="coordinatorLayoutStyle">@style/Widget.Support.CoordinatorLayout</item>
+        <item name="android:colorControlActivated" tools:targetApi="lollipop">#46bdbf</item>
     </style>
 
-    <style name="CustomActionBar" parent="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
-        <item name="windowActionBarOverlay">true</item>
-        <!-- Support library compatibility -->
-        <item name="windowActionBarOverlay">true</item>
+    <style name="MyAppTheme" parent="AppTheme">
+        <item name="android:windowContentTransitions" tools:targetApi="lollipop">true</item>
+        <item name="android:windowAllowEnterTransitionOverlap" tools:targetApi="lollipop">true
+        </item>
+        <item name="android:windowAllowReturnTransitionOverlap" tools:targetApi="lollipop">true
+        </item>
+        <item name="android:windowSharedElementEnterTransition" tools:targetApi="lollipop">
+            @android:transition/move
+        </item>
+        <item name="android:windowSharedElementExitTransition" tools:targetApi="lollipop">
+            @android:transition/move
+        </item>
     </style>
+
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+
 </resources>

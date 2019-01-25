@@ -5,6 +5,7 @@ import android.annotation.TargetApi;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
@@ -13,31 +14,38 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.AutocompleteFilter;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
+import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -55,7 +63,9 @@ public class MapsActivity extends AppCompatActivity implements
     private GoogleApiClient googleApiClient;
     private Marker currentUserLocationMarker;
     private static final int Request_User_Location_Code = 99;
-    LatLng latLng;
+    private LatLng latLng;
+    View mapView;
+    View locationButton;
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -65,33 +75,61 @@ public class MapsActivity extends AppCompatActivity implements
             checkUserLocationPermission();
         }
         setContentView(R.layout.activity_maps);
-        View parentLayout = findViewById(android.R.id.content);
-        final Snackbar snackbar = Snackbar.make(parentLayout, "Click on Marker to Send Coordinate to MainActivity", Snackbar.LENGTH_INDEFINITE);
-        snackbar.setAction("Dismiss", new View.OnClickListener() {
+//        ActionBar actionBar=getSupportActionBar();
+//        actionBar.hide();
+        PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment)
+                getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
+        AutocompleteFilter filter = new AutocompleteFilter.Builder()
+                .setTypeFilter(AutocompleteFilter.TYPE_FILTER_REGIONS)
+                .build();
+        autocompleteFragment.setFilter(filter);
+        autocompleteFragment.setHint("Search Your Location");
+
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
-            public void onClick(View v) {
-                snackbar.dismiss();
+            public void onPlaceSelected(Place place) {
+                mygoogleMap.addMarker(new MarkerOptions()
+                        .position(place.getLatLng())
+                        .title(String.valueOf(place.getAddress()))
+                        .draggable(true)
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))).showInfoWindow();
+                mygoogleMap.moveCamera(CameraUpdateFactory.newLatLng(place.getLatLng()));
+                mygoogleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 12.0f));
+            }
+
+            @Override
+            public void onError(Status status) {
+                Toast.makeText(MapsActivity.this, "Error in PlaceAutoCompleteFragment " + status, Toast.LENGTH_SHORT).show();
             }
         });
-        snackbar.show();
 
+        View parentLayout = findViewById(android.R.id.content);
+        Snackbar.make(parentLayout, "Click on Marker to Send Coordinate to MainActivity", Snackbar.LENGTH_LONG).show();
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
+        mapView = mapFragment.getView();
         mapFragment.getMapAsync(this);
-        //LocationButton Alignment
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        toolbar.setTitleTextColor(Color.WHITE);
-        //current location button
-        final View locationButton = ((View) mapFragment.getView().findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
-        RelativeLayout.LayoutParams rlp = (RelativeLayout.LayoutParams) locationButton.getLayoutParams();
-        rlp.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
-        rlp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
-        rlp.setMargins(0, 0, 30, 350);
-        locationButton.setOnClickListener(new View.OnClickListener() {
+        final Switch aSwitch = findViewById(R.id.onoff);
+        aSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onClick(View view) {
-                locationButton.setBackgroundColor(Color.BLUE);
+            public void onCheckedChanged(CompoundButton compoundButton, boolean ischecked) {
+                if (ischecked) {
+                    try {
+                        Toast.makeText(MapsActivity.this, "Night Mode Enabled", Toast.LENGTH_SHORT).show();
+                        ((SupportMapFragment) getSupportFragmentManager()
+                                .findFragmentById(R.id.map)).getMapAsync(MapsActivity.this);
+                        mygoogleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(MapsActivity.this, R.raw.mapstyle_night));
+                    } catch (Exception e) {
+                        Log.d("myDrag", "Night Mode " + e.getMessage());
+                    }
+                } else {
+                    try {
+                        Toast.makeText(MapsActivity.this, "Night Mode Disabled", Toast.LENGTH_SHORT).show();
+                        mygoogleMap.setMapStyle(null);
+                    } catch (Exception e) {
+                        Log.d("myDrag", "Day Mode " + e.getMessage());
+                    }
+                }
             }
         });
     }
@@ -102,20 +140,32 @@ public class MapsActivity extends AppCompatActivity implements
             mygoogleMap = googleMap;
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 buildGoogleApiClient();
-                mygoogleMap.setMyLocationEnabled(true);
-                mygoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-                mygoogleMap.getUiSettings().setZoomControlsEnabled(true);
-                mygoogleMap.getUiSettings().setZoomGesturesEnabled(true);
-                mygoogleMap.getUiSettings().setCompassEnabled(true);
-                mygoogleMap.getUiSettings().setMyLocationButtonEnabled(true);
-                mygoogleMap.getUiSettings().setRotateGesturesEnabled(true);
-                mygoogleMap.getUiSettings().setMapToolbarEnabled(true);
-                mygoogleMap.getUiSettings().setTiltGesturesEnabled(true);
-                mygoogleMap.getUiSettings().setMapToolbarEnabled(true);
-                mygoogleMap.getUiSettings().setScrollGesturesEnabled(true);
-                mygoogleMap.getUiSettings().setAllGesturesEnabled(true);
-                mygoogleMap.getUiSettings().setIndoorLevelPickerEnabled(true);
-                mygoogleMap.setPadding(12, 22, 12, 12);
+                googleMap.setMyLocationEnabled(true);
+                googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                googleMap.getUiSettings().setZoomControlsEnabled(true);
+                googleMap.getUiSettings().setZoomGesturesEnabled(true);
+                googleMap.getUiSettings().setCompassEnabled(true);
+                googleMap.getUiSettings().setMyLocationButtonEnabled(true);
+                googleMap.getUiSettings().setRotateGesturesEnabled(true);
+                googleMap.getUiSettings().setMapToolbarEnabled(true);
+                googleMap.getUiSettings().setTiltGesturesEnabled(true);
+                googleMap.getUiSettings().setMapToolbarEnabled(true);
+                googleMap.getUiSettings().setScrollGesturesEnabled(true);
+                googleMap.getUiSettings().setAllGesturesEnabled(true);
+                googleMap.getUiSettings().setIndoorLevelPickerEnabled(true);
+                googleMap.setTrafficEnabled(true);
+                if (mapView != null &&
+                        mapView.findViewById(Integer.parseInt("1")) != null) {
+                    // Get the button view
+                    locationButton = ((View) mapView.findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
+                    // and next place it, on bottom right (as Google Maps app)
+                    RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)
+                            locationButton.getLayoutParams();
+                    // position on right bottom
+                    layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
+                    layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+                    layoutParams.setMargins(0, 0, 30, 350);
+                }
             }
         } catch (Exception e) {
             e.getMessage();
@@ -144,6 +194,7 @@ public class MapsActivity extends AppCompatActivity implements
                             position.latitude,
                             position.longitude, 1);
                     filterAddress = addresses.get(0);
+                    marker.setTitle(filterAddress.getAddressLine(0));
                     marker.setSnippet(String.valueOf(position.latitude + " , " + position.longitude));
                     marker.showInfoWindow();
                     View parentLayout = findViewById(android.R.id.content);
@@ -159,6 +210,7 @@ public class MapsActivity extends AppCompatActivity implements
         mygoogleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
+                marker.showInfoWindow();
                 marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN));
                 return false;
             }
@@ -166,13 +218,39 @@ public class MapsActivity extends AppCompatActivity implements
         mygoogleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
+                locationButton.setBackgroundColor(Color.TRANSPARENT);
                 Toast.makeText(MapsActivity.this, "" + latLng, Toast.LENGTH_SHORT).show();
             }
         });
+        mygoogleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+            @Override
+            public void onMapLoaded() {
+                AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
+                builder.setTitle("!!! Instruction !!!")
+                        .setMessage("Please Enable Location Services at High Accuracy and Internet Connection if your location not Fetching." +
+                                "\n\nThank You\nFenestec Technologies Pvt. Ltd.")
+                        .setCancelable(false)
+                        .setPositiveButton("Got It!", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                Toast.makeText(MapsActivity.this, "Thank You ", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                AlertDialog alert = builder.create();
+                alert.show();
+            }
+        });
         mygoogleMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
+            @TargetApi(Build.VERSION_CODES.O)
+            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public boolean onMyLocationButtonClick() {
                 try {
+                    locationButton.setDefaultFocusHighlightEnabled(true);
+                    locationButton.setBackgroundColor(Color.BLUE);
+                    if (ActivityCompat.checkSelfPermission(MapsActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                            ActivityCompat.checkSelfPermission(MapsActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        mygoogleMap.setMyLocationEnabled(true);
+                    }
                     Address filterAddress;
                     Geocoder geoCoder = new Geocoder(
                             getBaseContext(), Locale.getDefault());
@@ -182,6 +260,7 @@ public class MapsActivity extends AppCompatActivity implements
                     filterAddress = addresses.get(0);
                     currentUserLocationMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
                     currentUserLocationMarker.setPosition(latLng);
+                    currentUserLocationMarker.setTitle("You are Here");
                     currentUserLocationMarker.setSnippet(String.valueOf(latLng.latitude + " ," + latLng.longitude));
                     currentUserLocationMarker.showInfoWindow();
                     View parentLayout = findViewById(android.R.id.content);
@@ -230,6 +309,7 @@ public class MapsActivity extends AppCompatActivity implements
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
+                .enableAutoManage(this, this)
                 .build();
         googleApiClient.connect();
     }
@@ -295,61 +375,13 @@ public class MapsActivity extends AppCompatActivity implements
 
     @Override
     public void onConnectionSuspended(int i) {
+        Toast.makeText(getApplicationContext(), "Connection suspended", Toast.LENGTH_LONG).show();
+        googleApiClient.connect();
+
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.actionbarmenu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        switch (item.getItemId()) {
-
-            case R.id.item1:
-                builder.setMessage("This application is developed by DEVASHISH SHARMA, under the supervision of 'Fenestec Technologies Pvt. Ltd.'\n" +
-                        "Any Copy or Modification in content of this application may illegal." + "\n\n" + "Thank You\nDevashish Sharma")
-                        .setCancelable(false)
-                        .setIcon(R.drawable.ic_insert_comment_black_24dp)
-                        .setTitle("Disclaimer")
-                        .setPositiveButton("OK Got It !!!", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                Toast.makeText(getApplicationContext(), "Your have readed Disclaimer",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        }).create().show();
-                break;
-            case R.id.item2:
-                builder.setMessage("Do you want to close application now!!!")
-                        .setCancelable(false)
-                        .setIcon(R.drawable.ic_close_black_24dp)
-                        .setTitle("!!! Close Application !!!")
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                finish();
-                                Toast.makeText(getApplicationContext(), "Thank you For using application",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        })
-                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                //  Action for 'NO' Button
-                                dialog.cancel();
-                                Toast.makeText(getApplicationContext(), "Welcome Back",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        }).create().show();
-                break;
-            case android.R.id.home:
-                onBackPressed();
-        }
-        return super.onOptionsItemSelected(item);
+        Toast.makeText(getApplicationContext(), "Connection failed: " + connectionResult.getErrorCode(), Toast.LENGTH_LONG).show();
     }
 }

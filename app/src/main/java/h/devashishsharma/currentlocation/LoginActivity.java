@@ -1,6 +1,5 @@
 package h.devashishsharma.currentlocation;
 
-import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -46,8 +45,19 @@ public class LoginActivity extends AppCompatActivity {
         ip_address = findViewById(R.id.ipaddress);
         db_name = findViewById(R.id.dbname);
         password = findViewById(R.id.password);
-        password.setBackgroundColor(Color.GRAY);
         loadfile();
+        login.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    MyLoginAsync myLoginAsync = new MyLoginAsync();
+                    myLoginAsync.execute("");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Log.d("file", "Login button occur exception " + e.getMessage());
+                }
+            }
+        });
         save.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
@@ -65,48 +75,48 @@ public class LoginActivity extends AppCompatActivity {
                 return true;
             }
         });
-    }
-
-    @SuppressLint({"ResourceAsColor", "NewApi"})
-    public void savefile(View view) {
-        save.setText("Update Configurations");
-
-        login.setEnabled(true);
-        login.setBackground(getResources().getDrawable(R.drawable.btn_effect));
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            save.setBackground(getResources().getDrawable(R.drawable.btn_effect));
-        }
-        password.setEnabled(true);
-        password.setBackgroundColor(Color.WHITE);
-        ip_address.setEnabled(false);
-        db_name.setEnabled(false);
-        ip_address.setBackgroundColor(Color.GRAY);
-        db_name.setBackgroundColor(Color.GRAY);
-        ipaddress = ip_address.getText().toString();
-        dbname = db_name.getText().toString();
-        if (ipaddress.isEmpty()) {
-            ip_address.setError("IP Address Required");
-        }
-        if (dbname.isEmpty()) {
-            db_name.setError("Enter Database name");
-        }
-        if (ipaddress.isEmpty() || dbname.isEmpty()) {
-            password.setEnabled(false);
-            password.setBackgroundColor(Color.GRAY);
-        }
-        try {
-            FileOutputStream fOut = openFileOutput("mysdFile.txt", Context.MODE_PRIVATE);
-            OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
-            myOutWriter.append(ipaddress + "\n");
-            myOutWriter.append(dbname);
-            myOutWriter.close();
-            fOut.close();
-            Toast.makeText(getApplicationContext(), "Database Name and IP-Address saved'", Toast.LENGTH_SHORT).show();
-            Toast.makeText(getApplicationContext(), "Press Long Tap on UPDATE CONFIGURATIONS", Toast.LENGTH_LONG).show();
-        } catch (Exception e) {
-            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-            Log.d("file", "File output stream releted exception " + e.getMessage());
-        }
+        save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                save.setText("Update Configurations");
+                login.setEnabled(true);
+                login.setBackground(getResources().getDrawable(R.drawable.btn_effect));
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    save.setBackground(getResources().getDrawable(R.drawable.btn_effect));
+                }
+                password.setEnabled(true);
+                password.setBackgroundColor(Color.WHITE);
+                ip_address.setEnabled(false);
+                db_name.setEnabled(false);
+                ip_address.setBackgroundColor(Color.GRAY);
+                db_name.setBackgroundColor(Color.GRAY);
+                ipaddress = ip_address.getText().toString();
+                dbname = db_name.getText().toString();
+                if (ipaddress.isEmpty()) {
+                    ip_address.setError("IP Address Required");
+                }
+                if (dbname.isEmpty()) {
+                    db_name.setError("Enter Database name");
+                }
+                if (ipaddress.isEmpty() || dbname.isEmpty()) {
+                    password.setEnabled(false);
+                    password.setBackgroundColor(Color.GRAY);
+                }
+                try {
+                    FileOutputStream fOut = openFileOutput("mysdFile.txt", Context.MODE_PRIVATE);
+                    OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
+                    myOutWriter.append(ipaddress + "\n");
+                    myOutWriter.append(dbname);
+                    myOutWriter.close();
+                    fOut.close();
+                    Toast.makeText(getApplicationContext(), "Database Name and IP-Address saved'", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Press Long Tap on UPDATE CONFIGURATIONS", Toast.LENGTH_LONG).show();
+                } catch (Exception e) {
+                    Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.d("file", "File output stream releted exception " + e.getMessage());
+                }
+            }
+        });
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -139,16 +149,6 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    public void LoginNow(View view) {
-        try {
-            MyLoginAsync myLoginAsync = new MyLoginAsync();
-            myLoginAsync.execute("");
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.d("file", "Login button occur exception " + e.getMessage());
-        }
-    }
-
     class MyLoginAsync extends AsyncTask<String, String, String> {
         String msg = "";
         Boolean isSuccess = false;
@@ -169,10 +169,12 @@ public class LoginActivity extends AppCompatActivity {
                 if (isSuccess) {
                     save.setEnabled(false);
                     password.setEnabled(false);
-                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                    intent.putExtra("userpass", passwordd);
-                    intent.putExtra("ip", ipdb_detail[0]);
-                    intent.putExtra("db", ipdb_detail[1]);
+                    Intent intent = new Intent(LoginActivity.this, TrackMeActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("userpass", passwordd);
+                    bundle.putString("ip", ipdb_detail[0]);
+                    bundle.putString("db", ipdb_detail[1]);
+                    intent.putExtras(bundle);
                     startActivity(intent);
                     finish();
                     Toast.makeText(LoginActivity.this, "Login Successfull", Toast.LENGTH_LONG).show();

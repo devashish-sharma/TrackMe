@@ -2,7 +2,7 @@
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="50dp"
-    android:background="@color/ft"
+    android:background="@drawable/spinner_effect"
     android:gravity="center|start"
     android:padding="10dp"
     android:text="@string/app_name"

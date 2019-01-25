@@ -2,7 +2,6 @@ package h.devashishsharma.currentlocation;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
@@ -13,13 +12,12 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -35,7 +33,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+public class HomeFragment extends Fragment {
     ProgressBar progressBar;
     Connection con = null;
     PreparedStatement statement;
@@ -45,35 +43,36 @@ public class MainActivity extends AppCompatActivity {
     Spinner spinner;
     private String sql_username = "TrackMe";
     String sql_customername;
-    String databasename, ipaddress, sql_userpass;
+    String databasename, ipaddress, userpass;
     Button updatelocation;
+    View view;
+    String ConnURL;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        view = inflater.inflate(R.layout.fragment_home, container, false);
         SELECTAsync selectAsync = new SELECTAsync();
         selectAsync.execute(" ");
-        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, new IntentFilter("LAT_LONG"));
-        final Button getuserlist = findViewById(R.id.btn1);
-        updatelocation = findViewById(R.id.btn2);
-        progressBar = findViewById(R.id.pb);
+        LocalBroadcastManager.getInstance(getContext()).registerReceiver(mReceiver, new IntentFilter("LAT_LONG"));
+        final Button getuserlist = view.findViewById(R.id.btn1);
+        updatelocation = view.findViewById(R.id.btn2);
+        progressBar = view.findViewById(R.id.pb);
         itemList = new ArrayList<Customer>();
-        spinner = findViewById(R.id.spinner);
-
-        final Button showmap = findViewById(R.id.showmap);
+        spinner = view.findViewById(R.id.spinner);
+        final Button showmap = view.findViewById(R.id.showmap);
         showmap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent;
-                LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+                LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
                 boolean enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
                 if (!enabled) {
-                    Toast.makeText(MainActivity.this, "Please Enable Location Services", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Please Enable Location Services", Toast.LENGTH_SHORT).show();
                     intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                     startActivity(intent);
                 } else {
-                    intent = new Intent(MainActivity.this, MapsActivity.class);
+                    intent = new Intent(getContext(), MapsActivity.class);
                     startActivity(intent);
                 }
             }
@@ -85,12 +84,12 @@ public class MainActivity extends AppCompatActivity {
                 Customer swt = (Customer) adapterView.getItemAtPosition(i);
                 selectedcustomerid = swt.customerID;
                 sql_customername = swt.customerName;
-                Toast.makeText(MainActivity.this, "" + sql_customername, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "" + sql_customername, Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
-                Toast.makeText(getApplicationContext(), "Select Any of them", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Select Any of them", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -98,10 +97,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 try {
-                    ArrayAdapter<Customer> adapter = new ArrayAdapter<Customer>(getApplicationContext(), R.layout.spinner_item, itemList);
+                    ArrayAdapter<Customer> adapter = new ArrayAdapter<Customer>(getContext(), R.layout.spinner_item, itemList);
                     adapter.setDropDownViewResource(R.layout.spinner_item);
                     spinner.setAdapter(adapter);
-                    Toast.makeText(getApplicationContext(), "Data Retrieved Successfully", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Data Retrieved Successfully", Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
                     e.printStackTrace();
                     Log.d("here", "Exception occur in Get User List Button " + e.getMessage());
@@ -112,17 +111,21 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (selectedcustomerid == null) {
-                    Toast.makeText(MainActivity.this, "Customer ID is NULL ", Toast.LENGTH_LONG).show();
-                    View parentLayout = findViewById(android.R.id.content);
-                    Snackbar.make(parentLayout, "!!! Select Customer First !!!", Snackbar.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "Customer ID is NULL ", Toast.LENGTH_LONG).show();
+                    Snackbar.make(view, "!!! Select Customer First !!!", Snackbar.LENGTH_LONG).show();
                 } else {
                     new UPDATEAsync().execute();
-                    View parentLayout = findViewById(android.R.id.content);
-                    Snackbar.make(parentLayout, "Data is Successfully Updated of user " + sql_customername, Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(view, "Data is Successfully Updated of user " + sql_customername, Snackbar.LENGTH_SHORT).show();
                     Log.d("here", "Data is updated successfully for " + sql_customername);
                 }
             }
         });
+        return view;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
     }
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -133,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
                 String receivedlat = intent.getStringExtra("lats");
                 String receivedlong = intent.getStringExtra("longs");
                 String receivedaddress = intent.getStringExtra("address");
-                TextView textView = findViewById(R.id.getlatlong);
+                TextView textView = (TextView) view.findViewById(R.id.getlatlong);
                 loc = receivedlat + "," + receivedlong;
                 textView.setText(receivedlat + " " + receivedlong + "\n" + receivedaddress);
                 if (textView != null) {
@@ -149,13 +152,8 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    public void seelist(View view) {
-        Intent intent = new Intent(MainActivity.this, TrackMeActivity.class);
-        startActivity(intent);
-    }
-
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
     }
 
@@ -163,11 +161,12 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public String doInBackground(String... strings) {
             try {
-                databasename = getIntent().getExtras().getString("db");
-                ipaddress = getIntent().getExtras().getString("ip");
-                sql_userpass = getIntent().getExtras().getString("userpass");
-                String ConnURL = "jdbc:jtds:sqlserver://" + ipaddress + ":1433;" + "databaseName=" + databasename + ";user=" + sql_username + ";password="
-                        + sql_userpass + ";";
+                userpass = getActivity().getIntent().getExtras().getString("userpass");
+                ipaddress = getActivity().getIntent().getStringExtra("ip");
+                databasename = getActivity().getIntent().getStringExtra("db");
+                Log.d("here", userpass + " " + ipaddress + " " + databasename);
+                ConnURL = "jdbc:jtds:sqlserver://" + ipaddress + ":1433;" + "databaseName=" + databasename + ";user=" + sql_username + ";password="
+                        + userpass + ";";
                 Class.forName("net.sourceforge.jtds.jdbc.Driver");
                 con = DriverManager.getConnection(ConnURL);
                 if (con != null) {
@@ -203,11 +202,8 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(String... strings) {
             try {
-                databasename = getIntent().getExtras().getString("db");
-                ipaddress = getIntent().getExtras().getString("ip");
-                sql_userpass = getIntent().getExtras().getString("userpass");
-                String ConnURL = "jdbc:jtds:sqlserver://" + ipaddress + ":1433;" + "databaseName=" + databasename + ";user=" + sql_username + ";password="
-                        + sql_userpass + ";";
+                ConnURL = "jdbc:jtds:sqlserver://" + ipaddress + ":1433;" + "databaseName=" + databasename + ";user=" + sql_username + ";password="
+                        + userpass + ";";
                 Class.forName("net.sourceforge.jtds.jdbc.Driver");
                 con = DriverManager.getConnection(ConnURL);
                 if (con != null) {
@@ -230,54 +226,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.actionbarmenu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        switch (item.getItemId()) {
-            case R.id.item1:
-                builder.setMessage("This application is developed by DEVASHISH SHARMA, under the supervision of 'Fenestec Technologies Pvt. Ltd.'\n" +
-                        "Any Copy or Modification in content of this application may illegal." + "\n\n" + "Thank You\nDevashish Sharma")
-                        .setCancelable(false)
-                        .setIcon(R.drawable.ic_insert_comment_black_24dp)
-                        .setTitle("Disclaimer")
-                        .setPositiveButton("OK Got It !!!", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                Toast.makeText(getApplicationContext(), "Your have readed Disclaimer",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        }).create().show();
-                break;
-            case R.id.item2:
-                builder.setMessage("Do you want to close application now!!!")
-                        .setCancelable(false)
-                        .setIcon(R.drawable.ic_close_black_24dp)
-                        .setTitle("!!! Close Application !!!")
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                finish();
-                                Toast.makeText(getApplicationContext(), "Thank you For using application",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        })
-                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                //  Action for 'NO' Button
-                                dialog.cancel();
-                                Toast.makeText(getApplicationContext(), "Welcome Back",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        }).create().show();
-                break;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    protected static class Customer {
+    private static class Customer {
         public String customerID;
         public String customerName;
 

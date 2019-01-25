@@ -1,124 +1,126 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/background"
-    android:gravity="center"
-    android:orientation="vertical"
-    tools:context=".LoginActivity">
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="250dp"
-        app:srcCompat="@mipmap/ftllogo1" />
-
-    <TextView
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/background"
         android:gravity="center"
-        android:text="LOGIN"
-        android:textColor="@android:color/black"
-        android:textSize="40dp" />
+        android:orientation="vertical"
+        tools:context=".LoginActivity">
 
-    <android.support.v7.widget.CardView
-        android:layout_width="300dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="20dp"
-        app:cardUseCompatPadding="true">
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="250dp"
+            android:contentDescription="Fenestec"
+            app:srcCompat="@mipmap/ftllogo1" />
 
-        <EditText
-            android:id="@+id/ipaddress"
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:focusable="auto"
-            android:hint=" Enter IP Address"
-            android:inputType="number|text"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:textColor="@android:color/black"
-            android:textColorHint="#000000" />
-    </android.support.v7.widget.CardView>
-
-    <android.support.v7.widget.CardView
-        android:layout_width="300dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:background="@android:color/transparent"
-        app:cardUseCompatPadding="true">
-
-        <EditText
-            android:id="@+id/dbname"
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:focusable="auto"
-            android:hint=" Enter Database Name"
-            android:inputType="text|textAutoCorrect"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:textColor="@android:color/black"
-            android:textColorHint="#000000" />
-    </android.support.v7.widget.CardView>
-
-    <android.support.v7.widget.CardView
-        android:layout_width="300dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        app:cardUseCompatPadding="true">
-
-        <EditText
-            android:id="@+id/password"
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:enabled="false"
-            android:focusable="auto"
-            android:hint=" Enter Password"
-            android:inputType="textPassword"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:text=""
-            android:textColor="@android:color/black"
-            android:textColorHint="#000000" />
-
-    </android.support.v7.widget.CardView>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/login"
-            android:layout_width="155dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginRight="5dp"
-            android:background="@drawable/btn_effect"
-            android:onClick="LoginNow"
-            android:text="Login"
-            android:textColor="@android:color/white" />
-
-        <ProgressBar
-            android:id="@+id/progressbar"
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginRight="5dp"
-            android:visibility="gone" />
+            android:gravity="center"
+            android:text="@string/login"
+            android:textColor="@android:color/black"
+            android:textSize="40sp" />
 
-        <Button
-            android:id="@+id/save"
-            android:layout_width="155dp"
+        <android.support.v7.widget.CardView
+            android:layout_width="350dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:background="@drawable/btn_effect"
-            android:onClick="savefile"
-            android:text="Save"
-            android:textColor="@android:color/white" />
+            android:layout_marginTop="20dp"
+            app:cardUseCompatPadding="true">
+
+            <EditText
+                android:id="@+id/ipaddress"
+                android:layout_width="350dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:hint="@string/enter_ip_address"
+                android:inputType="phone"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:textColor="@android:color/black"
+                android:textColorHint="#000000" />
+        </android.support.v7.widget.CardView>
+
+        <android.support.v7.widget.CardView
+            android:layout_width="350dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@android:color/transparent"
+            app:cardUseCompatPadding="true">
+
+            <EditText
+                android:id="@+id/dbname"
+                android:layout_width="350dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:hint="@string/enter_database_name"
+                android:inputType="text"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:textColor="@android:color/black"
+                android:textColorHint="#000000" />
+        </android.support.v7.widget.CardView>
+
+        <android.support.v7.widget.CardView
+            android:layout_width="350dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            app:cardUseCompatPadding="true">
+
+            <EditText
+                android:id="@+id/password"
+                android:layout_width="350dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:enabled="false"
+                android:hint="@string/enter_password"
+                android:inputType="textPassword"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:textColor="@android:color/black"
+                android:textColorHint="#000000" />
+
+        </android.support.v7.widget.CardView>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/login"
+                android:layout_width="160dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginRight="5dp"
+                android:background="@drawable/btn_effect"
+                android:text="Login"
+                android:textColor="@android:color/white" />
+
+            <ProgressBar
+                android:id="@+id/progressbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="5dp"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/save"
+                android:layout_width="160dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@drawable/btn_effect"
+                android:text="Save"
+                android:textColor="@android:color/white" />
+        </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+</ScrollView>
